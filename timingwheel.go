@@ -101,6 +101,7 @@ func (tw *TimingWheel) add(t *Timer) bool {
 		// Out of the interval. Put it into the overflow wheel
 		overflowWheel := atomic.LoadPointer(&tw.overflowWheel)
 		if overflowWheel == nil {
+			fmt.Println(111)
 			atomic.CompareAndSwapPointer(
 				&tw.overflowWheel,
 				nil,
@@ -113,6 +114,8 @@ func (tw *TimingWheel) add(t *Timer) bool {
 			)
 			overflowWheel = atomic.LoadPointer(&tw.overflowWheel)
 		}
+		fmt.Println(222)
+		fmt.Println("t.key,",t.key)
 		return (*TimingWheel)(overflowWheel).add(t)
 	}
 }
