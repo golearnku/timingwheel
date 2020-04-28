@@ -9,7 +9,6 @@ package timingwheel
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -99,7 +98,6 @@ func (tw *TimingWheel) add(t *Timer) bool {
 		// Out of the interval. Put it into the overflow wheel
 		overflowWheel := atomic.LoadPointer(&tw.overflowWheel)
 		if overflowWheel == nil {
-			fmt.Println(111)
 			atomic.CompareAndSwapPointer(
 				&tw.overflowWheel,
 				nil,
@@ -112,8 +110,6 @@ func (tw *TimingWheel) add(t *Timer) bool {
 			)
 			overflowWheel = atomic.LoadPointer(&tw.overflowWheel)
 		}
-		fmt.Println(222)
-		fmt.Println("t.key,",t.key)
 		return (*TimingWheel)(overflowWheel).add(t)
 	}
 }
@@ -184,9 +180,10 @@ func (tw *TimingWheel) AfterFunc(key string, d time.Duration, f func()) *Timer {
 		expiration: timeToMs(time.Now().UTC().Add(d)),
 		task:       f,
 	}
-	fmt.Println("key",t.key)
+
 	tw.timer.Store(t.key, t)
 	tw.addOrRun(t)
+
 	return t
 }
 
@@ -236,7 +233,7 @@ func (tw *TimingWheel) ScheduleFunc(key string, s Scheduler, f func()) (t *Timer
 			f()
 		},
 	}
-	fmt.Println("key",t.key)
+
 	tw.timer.Store(t.key, t)
 	tw.addOrRun(t)
 
@@ -246,7 +243,6 @@ func (tw *TimingWheel) ScheduleFunc(key string, s Scheduler, f func()) (t *Timer
 // Remove.
 func (tw *TimingWheel) Remove(key string) {
 	value, ok := tw.timer.Load(key)
-	fmt.Println("ok",ok)
 	if !ok {
 		return
 	}
