@@ -75,11 +75,6 @@ func newTimingWheel(tickMs int64, wheelSize int64, startMs int64, queue *delayqu
 // add inserts the timer t into the current timing wheel.
 func (tw *TimingWheel) add(t *Timer) bool {
 	currentTime := atomic.LoadInt64(&tw.currentTime)
-	_, ok := tw.timer.Load(t.key)
-	if !ok {
-		// task remove
-		return false
-	}
 	if t.expiration < currentTime+tw.tick {
 		// Already expired
 		return false
@@ -99,8 +94,6 @@ func (tw *TimingWheel) add(t *Timer) bool {
 			// same expiration will not be enqueued multiple times.
 			tw.queue.Offer(b, b.Expiration())
 		}
-		fmt.Println("key",t.key)
-		tw.timer.Store(t.key, t)
 		return true
 	} else {
 		// Out of the interval. Put it into the overflow wheel
@@ -191,6 +184,8 @@ func (tw *TimingWheel) AfterFunc(key string, d time.Duration, f func()) *Timer {
 		expiration: timeToMs(time.Now().UTC().Add(d)),
 		task:       f,
 	}
+	fmt.Println("key",t.key)
+	tw.timer.Store(t.key, t)
 	tw.addOrRun(t)
 	return t
 }
@@ -241,6 +236,8 @@ func (tw *TimingWheel) ScheduleFunc(key string, s Scheduler, f func()) (t *Timer
 			f()
 		},
 	}
+	fmt.Println("key",t.key)
+	tw.timer.Store(t.key, t)
 	tw.addOrRun(t)
 
 	return
