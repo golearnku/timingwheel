@@ -75,6 +75,11 @@ func newTimingWheel(tickMs int64, wheelSize int64, startMs int64, queue *delayqu
 // add inserts the timer t into the current timing wheel.
 func (tw *TimingWheel) add(t *Timer) bool {
 	currentTime := atomic.LoadInt64(&tw.currentTime)
+	_, ok := tw.timer.Load(t.key)
+	if !ok {
+		// task remove
+		return false
+	}
 	if t.expiration < currentTime+tw.tick {
 		// Already expired
 		return false
