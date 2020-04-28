@@ -9,6 +9,7 @@ package timingwheel
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -239,6 +240,7 @@ func (tw *TimingWheel) ScheduleFunc(key string, s Scheduler, f func()) (t *Timer
 // Remove.
 func (tw *TimingWheel) Remove(key string) {
 	value, ok := tw.timer.Load(key)
+	fmt.Println("ok",ok)
 	if !ok {
 		return
 	}
